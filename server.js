@@ -6,15 +6,23 @@ var express  = require('express');
 var app      = express();
 var port     = process.env.PORT || 8080;
 var mongoose = require('mongoose');
-var passport = require('passport');
 var flash 	 = require('connect-flash');
 
 var configDB = require('./config/database.js');
 
 // configuration ===============================================================
-mongoose.connect(configDB.url); // connect to our database
+// configuration ===============================================================
+mongoose.connect(configDB.settings.url, function (err, res) {
+  if (err) {
+	console.log ('ERROR connecting to: ' + configD.settings.url + '. ' + err);
+  } else {
+	console.log ('Succeeded connected to: ' + configDB.settings.url);
+  }
+});
+ 
+var Image = mongoose.model('images', configDB.image);
+var Menu = mongoose.model('menus', configDB.menu);
 
- require('./config/passport')(passport); // pass passport for configuration
 
 app.configure(function() {
 
@@ -34,14 +42,21 @@ app.configure(function() {
 
 	// required for passport
 	app.use(express.session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
-	app.use(passport.initialize());
-	app.use(passport.session()); // persistent login sessions
-	app.use(flash()); // use connect-flash for flash messages stored in session
 
+	app.use(flash()); // use connect-flash for flash messages stored in session
+	
+	// Make our db accessible to our router
+	app.use(function(req,res,next){
+		req.images = Image;
+		req.menus = Menu;
+		next();
+	});
 });
 
+
+
 // routes ======================================================================
-require('./app/routes.js')(app, passport,express); // load our routes and pass in our app and fully configured passport
+require('./app/routes.js')(app,express); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
 app.listen(port);
