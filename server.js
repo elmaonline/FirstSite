@@ -32,8 +32,9 @@ app.configure(function() {
 
 	console.log('static contents at: ' + __dirname + '/public');
 
-	app.use(express.static(__dirname + '/public', { maxAge: oneDay }));
-	// set up our express application
+	app.use('/public', express.static(__dirname + '/public', { maxAge: oneDay }));
+	
+    // set up our express application
 	app.use(express.logger('dev')); // log every request to the console
 	app.use(express.cookieParser()); // read cookies (needed for auth)
 	app.use(express.bodyParser()); // get information from html forms
@@ -59,5 +60,7 @@ app.configure(function() {
 require('./app/routes.js')(app,express); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
+
+
 app.listen(port);
 console.log('The magic happens on port ' + port);

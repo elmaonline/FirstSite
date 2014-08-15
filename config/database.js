@@ -1,10 +1,21 @@
 var mongoose = require('mongoose');
 
 var image = new mongoose.Schema({
-	  mainImageName: { type: String, trim: true},
-	  smallImage: { type: String, trim: true},
+      cId: { type: Number, min: 0},
+	  parentCId: { type: Number, min: 0},
+	  imageName: { type: String, trim: true},
 	  description: { type: String, trim: true},
-	  menuItem: { type: Number, min: 0}
+	  menuId: { type: Number, min: 0},
+	  contentDim: {
+			 x: { type: Number, min: 0},
+			 y: { type: Number, min: 0}
+			},
+      responseId: { type: Number, min: 0},
+      lImage: {
+             name: { type: String, trim: true},
+			 x: { type: Number, min: 0},
+			 y: { type: Number, min: 0}
+			}
 });
 
 var menu = new mongoose.Schema({

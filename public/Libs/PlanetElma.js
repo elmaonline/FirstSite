@@ -1,55 +1,101 @@
-﻿function PlanetElma(loader) {
+function PlanetElma(loader) {
 
     this.loader = loader;
 	this.selectedMenu=0;
-
+	//this.selection = [];
+	this.selectionList = new SelectionList();
+	this.imageUrl='/public/Images/';
 }
 
 
 PlanetElma.prototype.LoadImages = function () {
-
-	 
-    var idx = 0;
-    var newInner = "";
-
-	$.getJSON( "/helloworld", function( data ) {
-		$.each( data, function( key, val ) {
-			newInner+= '<a id ="image"'+ key + ' href="" class ="frame"><img src="/Images/'+val.smallImage + '"></a>';  
-		  });
-	  
-		$('#gallery-container').html(newInner);
+    var that =this;
+    
+	$.getJSON( "/imagebyparentid?pid=0", function( data ) {
+	   that.displayImages(data);		 
 	});
 
-	$('body').on("click", ".frame", $.proxy(function () { this.SelectImage(); return false; }, this));
+	$('body').on("click", ".frame", $.proxy(function (e) { 
+        var id = e.target.attributes['data-id'].value;
+        
+        this.SelectImage(id); 
+        return false; 
+    }, this));
 };
 
-PlanetElma.prototype.SelectImage = function () {
+
+PlanetElma.prototype.displayImages = function (data) {
+    var that =this;
+    var idx = 0;
+    var newInner = "";
+    
+    $.each( data, function( key, val ) {		
+			newInner+= '<div style="display: inline"><a id ="image'+ key + '" href="" class ="frame"><img id ="i'+ key +'"  data-id = "'+ val.cId +'" src="'+ that.imageUrl+val.imageName + '"></a>';			
+	});
+	  
+    $('#gallery-container').html(newInner);
+};
+
+
+
+PlanetElma.prototype.SelectImage = function (id) {
 // get selection id
+  //  alert('img selected' + id);
+    
+    var that = this;
+
+    $.getJSON( "/imagebyparentid?pid="+id, function( data ) {
+
+        that.displayImages(data);	
+        
+        that.LoadMenus(1);	
+    });
+    
+    // get child images from parentid
 };
 
 
-PlanetElma.prototype.LoadMenus = function () {
-
-	 
-    var idx = 0;
-    var newInner = "";
-
-	$.getJSON( "/menus", function( data ) {
+PlanetElma.prototype.LoadMenus = function (parentId) { 
+	var that = this;
 	
-		$.each( data, function( key, val ) {
-			newInner+= '<a id ="menu"'+ val.menuId + ' href="" class ="mitem">'+val.displayName+'</a>';  
-		  });
-	  
-		$('#menu-container').html(newInner);
-	});
-
-	$('body').on("click", ".mitem", $.proxy(function () { this.SelectMenu(); return false; }, this));
-	
-    //$('myOjbect').css('background-image', 'url(' + imageUrl + ')');
-
-
+    if(parentId == undefined )
+    {
+        $.getJSON( "/menus", function( data ) {
+            that.selectionList.populateList(data, that.SelectMenu, that);
+        });
+    }
+    else
+    {
+        $.getJSON( "/menusByParentId?pid="+parentId, function( data ) {
+            that.selectionList.populateList(data, that.SelectMenu, that);
+        });
+    }
+    
+    
 };
 
-PlanetElma.prototype.SelectMenu = function () {
+PlanetElma.prototype.SelectMenu = function (evt) {
+    
+    // menu is clicked we end up here with selected menu ids
+    
+    //evt is NOW selection
+    
+	//this.selectionList.selection;
+    
+    var that = this;
 
+    console.log('select menu:'+evt);
+    
+    $.getJSON( "/imagebymenuid?mid="+evt, function( data ) {
+
+        that.displayImages(data);	
+        
+    });
+    
+    if(evt == 4)
+    {
+          that.LoadMenus();	
+        that.LoadImages();
+    }
+    
 };
