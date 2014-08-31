@@ -1,9 +1,14 @@
+
+//yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+
 function PlanetElma(loader) {
 
     this.loader = loader;
 	this.selectedMenu=0;
 	//this.selection = [];
 	this.selectionList = new SelectionList();
+	this.subMenuList = new SelectionList();
+	
 	this.imageUrl='/public/Images/';
 }
 
@@ -61,15 +66,16 @@ PlanetElma.prototype.LoadMenus = function (parentId) {
     if(parentId == undefined )
     {
         $.getJSON( "/menus", function( data ) {
-            that.selectionList.populateList(data, that.SelectMenu, that);
+            that.selectionList.populateList(data, that.SelectMenu, that, 'menu-container');
         });
     }
-    else
-    {
-        $.getJSON( "/menusByParentId?pid="+parentId, function( data ) {
-            that.selectionList.populateList(data, that.SelectMenu, that);
-        });
-    }
+ 
+  //  else
+  //  {
+  //      $.getJSON( "/menusByParentId?pid="+parentId, function( data ) {
+  //          that.selectionList.populateList(data, that.SelectMenu, that,'menu-container');
+  //      });
+  //  }
     
     
 };
@@ -81,10 +87,17 @@ PlanetElma.prototype.SelectMenu = function (evt) {
     //evt is NOW selection
     
 	//this.selectionList.selection;
+    var that = this;
+    console.log('select menu:'+evt);
+  //  $.getJSON( "/menusByParentId?pid="+evt, function( data ) {
+  //      if(data.length >0)
+  //          that.subMenuList.populateList(data, that.SelectMenu, that,'sub-menu-container');
+  //  });
+  
     
     var that = this;
 
-    console.log('select menu:'+evt);
+    
     
     $.getJSON( "/imagebymenuid?mid="+evt, function( data ) {
 
@@ -92,10 +105,10 @@ PlanetElma.prototype.SelectMenu = function (evt) {
         
     });
     
-    if(evt == 4)
-    {
-          that.LoadMenus();	
-        that.LoadImages();
-    }
+   // if(evt == 4)
+   // {
+   //       that.LoadMenus();	
+    //    that.LoadImages();
+   // }
     
 };

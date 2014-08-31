@@ -4,7 +4,7 @@
 // get all the tools we need
 var express  = require('express');
 var app      = express();
-var port     = process.env.PORT || 8080;
+var port     = process.env.PORT || 3000;
 var mongoose = require('mongoose');
 var flash 	 = require('connect-flash');
 
@@ -26,7 +26,7 @@ var Menu = mongoose.model('menus', configDB.menu);
 
 app.configure(function() {
 
-	var oneDay = 86400000;
+	var oneDay = 1;
 
 	app.use(express.compress());
 

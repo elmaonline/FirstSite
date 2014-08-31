@@ -2,16 +2,22 @@
 var SelectionList = function () {   
     this.selection =[];
     
+    this.multiSelect=false;
+    
+    
+    
 };
 
 
 SelectionList.prototype = {
 
-    populateList: function (data, func,context) {
+    populateList: function (data, func,context,container) {
        
         var selectEvents = [];
 		var newInner = "";
         
+        
+        // fill out HTML
 		$.each( data, function( key, val ) {
 			
             var lmenuid= val.menuId;
@@ -33,15 +39,31 @@ SelectionList.prototype = {
 			selectEvents.push({ key: 'menu' + lmenuid, value: String(lmenuid) });			
 		  });
 	  
-		$('#menu-container').html(newInner);
+	    container = '#' + container;
+	    
+		$(container).html(newInner);
 			
+        
+        
         
         var that = this;
         
+        // link event method
         var iSelectMenu = function (evt) {
     
-            that.handleSelection(evt, that.selection, '#menu-container a', "#menuId");
- 
+          // get the selection object
+           that.selection = that.handleSelection(evt, container +' a', "#menuId");
+
+            // now we need to work out which level we are on here
+            
+            if(container =='#menu-container' )
+            {
+                // do we have any children if so add them
+                $.getJSON( "/menusByParentId?pid="+evt, function( data ) {
+                    that.populateList(data, that.SelectMenu, that,'sub-menu-container');
+                });
+            }
+           
             func.call(context,that.selection);
         };
         
@@ -57,22 +79,34 @@ SelectionList.prototype = {
 
 
         if (evt != undefined) {
-            var arIdx = jQuery.inArray(evt, selection);
-
-            if (arIdx == -1) {
-                selection.push(evt);
+            
+            if(this.multiSelect){
+                
+                var arIdx = jQuery.inArray(evt, this.selection);
+    
+                if (arIdx == -1) {
+                    this.selection.push(evt);
+                }
+                else {
+                    this.selection.splice(arIdx, 1);
+                }
             }
-            else {
-                selection.splice(arIdx, 1);
+            else
+            {
+                this.selection=[];
+                
+                this.selection.push(evt);
             }
         }
 
-
+        
+        var that = this;
+        
         $(bodytag).each(function () {
             $this = $(this)
 
             var quantity = $this.find(id).val();
-            arIdx = jQuery.inArray(quantity, selection);
+            arIdx = jQuery.inArray(quantity, that.selection);
 
             if (arIdx == -1) {
                 $this.removeClass('highLightRow');
@@ -85,7 +119,7 @@ SelectionList.prototype = {
 
 
 
-        return selection;
+        return this.selection;
     },
 
     addlinks: function (dupeEvents, func, context) {
